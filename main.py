@@ -2,6 +2,8 @@ from math import inf
 import sys
 import os
 import time
+import random
+
 HUMAN = 1
 COMP = -1
 VOID = 0
@@ -236,6 +238,16 @@ def ai_turn(board):
     board[row][col] = COMP
     print(render(board))  # Show result board
 
+def random_ai_turn(board):
+    print("Tour de l'IA naïve : \n")
+
+    # Choix aleatoire parmis les remain
+    remain = empty_cells(board)
+    x, y = random.choice(remain)
+
+    board[x][y] = COMP
+    print(render(board))  # Show result board
+
 def render(board):
     """Render the board board to stdout"""
     pretty_board = [[LEGEND[col] for col in row] for row in board]
@@ -264,7 +276,7 @@ def main():
         if len(empty_cells(board)) == 0 or wins(board, HUMAN):
             break
         start_time = time.time()
-        ai_turn(board)
+        random_ai_turn(board)
         print("--- %s seconds ---" % (time.time() - start_time))
     if wins(board, COMP):
         print("L'IA a gagné !")
