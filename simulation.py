@@ -5,8 +5,8 @@ import time
 import random
 
 PLAYERS = ['IA_random', 'IA_minimax', 'IA_minimax_AB']
-PLAYER1 = -1
-PLAYER2 = 1
+PLAYER1 = 1
+PLAYER2 = -1
 VOID = 0
 LEGEND = dict(zip((VOID, PLAYER1, PLAYER2), (" ", "O", "X")))
 
@@ -164,11 +164,11 @@ def minimaxWithAB(board, depth, player, true_player, alpha = -inf, beta = inf):
         x, y = cell[0], cell[1]
         board[x][y] = player
         if evaluate(board) == true_player:
-            best = [x, y, true_player]
-            board[x][y] = 0
+            best = [ x, y, true_player]
+            board[x][y] = VOID
             break
         score = minimaxWithAB(board, depth - 1, -player, true_player, alpha, beta)
-        board[x][y] = 0
+        board[x][y] = VOID
         score[0], score[1] = x, y
         if player == true_player:
             if score[2] < best[2]:
@@ -206,9 +206,9 @@ def ai_turn(board, algo, player):
         remain = empty_cells(board)
         x, y = random.choice(remain)
     elif algo == 'IA_minimax':
-        x, y, score = minimax(board, depth, player, player)
+        x, y, score = minimax(board, depth, -1, -1)
     elif algo == 'IA_minimax_AB':
-        x, y, score = minimaxWithAB(board, depth, player, player)
+        x, y, score = minimaxWithAB(board, depth, -1, -1)
 
     board[x][y] = player
 
@@ -221,9 +221,13 @@ def make_board(nb: int = 3):
     return [[0 for j in range(0, nb)] for i in range(0, nb)]
     # return [[0]*nb]*nb // Ne marche, chaque ligne obtient la même id()
 
+def test():
+  print(f"PLAYER1 : {PLAYER1}")
+
 def main():
     clean()
     nb_simulations_ok = algo_player1_ok = algo_player2_ok = False
+    global PLAYER1, PLAYER2
 
     while not algo_player1_ok:
             algo_player1 = str(input("Joueur 1 ("+'|'.join(PLAYERS)+") :"))
@@ -236,6 +240,9 @@ def main():
             algo_player2 = str(input("Joueur 2 ("+'|'.join(PLAYERS)+") :"))
             if algo_player2 in PLAYERS:
                 algo_player2_ok = True
+                if algo_player2 == 'IA_random':
+                  PLAYER1 = -1
+                  PLAYER2 = 1
             else:
                 print("Joueur 2 incorrect : choisir parmi "+'|'.join(PLAYERS))
 
@@ -252,7 +259,8 @@ def main():
     win_player1 = win_player2 = draw = 0
     start_time = time.time()
     for i in range(nb_simulations):
-        if i in list(range(0,nb_simulations,int(nb_simulations/10))):
+        nb_p = 1 if int(nb_simulations/10)==0 else int(nb_simulations/10)
+        if i in list(range(0,nb_simulations,nb_p)):
             print(f"{i}/{nb_simulations}... ({time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - start_time))})")
 
         board = make_board()

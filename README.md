@@ -8,7 +8,7 @@
 ### Description
 
 - `main.py` : Script pour jouer au Tic Tac Toe face à une IA (Näive, Minimax ou Minimax Alpha Beta)
-- `simulation.py` : Script pour lancer des simulations de n parties entre deux IA (board 3x3)
+- `simulation.py` : Script pour lancer des simulations de `n` parties entre deux IA (board 3x3)
 
 ### Résultats des simulations
 

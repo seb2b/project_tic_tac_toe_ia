@@ -4,6 +4,7 @@ import os
 import time
 import random
 
+IA_AVAILABLE = ['IA_random', 'IA_minimax', 'IA_minimax_AB']
 HUMAN = 1
 COMP = -1
 VOID = 0
@@ -228,25 +229,21 @@ def human_turn(board):
         clean()
         print(render(board))
 
-def ai_turn(board):
-    print("Tour de l'IA : \n")
+def ai_turn(board, algo):
     depth = len(empty_cells(board))  # The remaining of empty cells
+    print(f"Tour de l'IA {algo} : \n")
 
-    # the optimal move for computer
-    row, col, score = minimaxWithAB(board, depth, COMP)
-    # print(row, col, score)
-    board[row][col] = COMP
-    print(render(board))  # Show result board
-
-def random_ai_turn(board):
-    print("Tour de l'IA naïve : \n")
-
-    # Choix aleatoire parmis les remain
-    remain = empty_cells(board)
-    x, y = random.choice(remain)
+    if algo == 'IA_random':
+        # Choix aleatoire parmis les remain
+        remain = empty_cells(board)
+        x, y = random.choice(remain)
+    elif algo == 'IA_minimax':
+        x, y, score = minimax(board, depth, COMP)
+    elif algo == 'IA_minimax_AB':
+        x, y, score = minimaxWithAB(board, depth, COMP)
 
     board[x][y] = COMP
-    print(render(board))  # Show result board
+    print(render(board))
 
 def render(board):
     """Render the board board to stdout"""
@@ -259,7 +256,15 @@ def make_board(nb: int = 3):
 
 def main():
     clean()
-    nb_cases_ok = False
+    nb_cases_ok = ia_selected_ok = False
+
+    while not ia_selected_ok:
+        ia_selected = str(input("IA à affronter (" + '|'.join(IA_AVAILABLE) + ") :"))
+        if ia_selected in IA_AVAILABLE:
+            ia_selected_ok = True
+        else:
+            print("IA incorrecte : choisir parmi " + '|'.join(IA_AVAILABLE))
+
     while not nb_cases_ok:
         try:
             nb_cases = int(input("Nombre de cases :"))
@@ -277,10 +282,10 @@ def main():
         if len(empty_cells(board)) == 0 or wins(board, HUMAN):
             break
         start_time = time.time()
-        ai_turn(board)
+        ai_turn(board, ia_selected)
         print("--- %s seconds ---" % (time.time() - start_time))
     if wins(board, COMP):
-        print("L'IA a gagné !")
+        print(f"L'IA {ia_selected} a gagné !")
     elif wins(board, HUMAN):
         print("Vous avez gagné !")
     else:
