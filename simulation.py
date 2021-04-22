@@ -4,10 +4,11 @@ import os
 import time
 import random
 
-HUMAN = 1
-COMP = -1
+PLAYERS = ['IA_random', 'IA_minimax', 'IA_minimax_AB']
+PLAYER1 = -1
+PLAYER2 = 1
 VOID = 0
-LEGEND = dict(zip((VOID, HUMAN, COMP), (" ", "O", "X")))
+LEGEND = dict(zip((VOID, PLAYER1, PLAYER2), (" ", "O", "X")))
 
 def evaluate(board):
     """
@@ -15,10 +16,10 @@ def evaluate(board):
     Heuristic - allow the computer to discover the solution
     of some problems by itself.
     """
-    if wins(board, COMP):
-        return COMP
-    if wins(board, HUMAN):
-        return HUMAN
+    if wins(board, PLAYER2):
+        return PLAYER2
+    if wins(board, PLAYER1):
+        return PLAYER1
     return VOID
 
 def empty_cells(board):
@@ -118,7 +119,7 @@ def wins(board, player, nb_win_case: int = 4):
 
 def game_over(board):
     """Check game over condition"""
-    return wins(board, HUMAN) or wins(board, COMP)
+    return wins(board, PLAYER1) or wins(board, PLAYER2)
 
 def clean():
     """Clear system terminal"""
@@ -128,9 +129,9 @@ def clean():
     else:
         os.system('clear')
 
-def minimax(board, depth, player):
+def minimax(board, depth, player, true_player):
     # inf/-inf are the initial score for the players
-    best = [None, None, inf if player == COMP else -inf]
+    best = [None, None, inf if player == true_player else -inf]
     if depth == 0 or game_over(board):
         return [None, None, evaluate(board)]
         # return [None, None, evaluate(board) * ( 1 / depth if depth else 1)]
@@ -138,23 +139,23 @@ def minimax(board, depth, player):
         # Fill the empty cells with the player symbols
         x, y = cell[0], cell[1]
         board[x][y] = player
-        if evaluate(board) == COMP:
-            best = [ x, y, COMP]
+        if evaluate(board) == true_player:
+            best = [ x, y, true_player]
             board[x][y] = 0
             break
-        score = minimax(board, depth - 1, -player)
+        score = minimax(board, depth - 1, -player, true_player)
         board[x][y] = 0
         score[0], score[1] = x, y
-        if player == COMP:
+        if player == true_player:
             if score[2] < best[2]:
                 best = score
         elif score[2] > best[2]:
             best = score
     return best
 
-def minimaxWithAB(board, depth, player, alpha = -inf, beta = inf):
+def minimaxWithAB(board, depth, player, true_player, alpha = -inf, beta = inf):
     # inf/-inf are the initial score for the players
-    best = [None, None, inf if player == COMP else -inf]
+    best = [None, None, inf if player == true_player else -inf]
     if depth == 0 or game_over(board):
         return [None, None, evaluate(board)]
         # return [None, None, evaluate(board) * ( 1 / depth if depth else 1)]
@@ -162,14 +163,14 @@ def minimaxWithAB(board, depth, player, alpha = -inf, beta = inf):
         # Fill the empty cells with the player symbols
         x, y = cell[0], cell[1]
         board[x][y] = player
-        if evaluate(board) == COMP:
-            best = [ x, y, COMP]
+        if evaluate(board) == true_player:
+            best = [x, y, true_player]
             board[x][y] = 0
             break
-        score = minimaxWithAB(board, depth - 1, -player, alpha, beta)
+        score = minimaxWithAB(board, depth - 1, -player, true_player, alpha, beta)
         board[x][y] = 0
         score[0], score[1] = x, y
-        if player == COMP:
+        if player == true_player:
             if score[2] < best[2]:
                 best = score
             if best[2] <= alpha:
@@ -197,56 +198,19 @@ def nb_to_coord(move: int, board_length: int):
                 return i, j
     return None
 
-def human_turn(board):
-    nb_cases = len(board)
-    remain = empty_cells(board)
-    isTurn = True
-    print("Votre tour")
-    while isTurn:
-        try:
-            move = int(
-                input(f"Jouez un coup (1-{nb_cases * nb_cases}) :")
-            )
-            coord = nb_to_coord(move, nb_cases)
-            # When the player move is valid
-            # print(coord)
-            # print(remain)
-            if coord in remain:
-                x, y = coord
-                board[x][y] = HUMAN
-                isTurn = False
-            else:
-                print("Cette case est déjà prise.")
-        # When the player mistype
-        except ValueError:
-            print(
-                f"Coup incorrect, veuillez jouer un coup (1-{nb_cases * nb_cases})"
-            )
-    # While-else loop, this code below will run after successful loop.
-    else:
-        # Clean the terminal, and show the current board
-        clean()
-        print(render(board))
-
-def ai_turn(board):
-    print("Tour de l'IA : \n")
+def ai_turn(board, algo, player):
     depth = len(empty_cells(board))  # The remaining of empty cells
 
-    # the optimal move for computer
-    row, col, score = minimaxWithAB(board, depth, COMP)
-    # print(row, col, score)
-    board[row][col] = COMP
-    print(render(board))  # Show result board
+    if algo == 'IA_random':
+        # Choix aleatoire parmis les remain
+        remain = empty_cells(board)
+        x, y = random.choice(remain)
+    elif algo == 'IA_minimax':
+        x, y, score = minimax(board, depth, player, player)
+    elif algo == 'IA_minimax_AB':
+        x, y, score = minimaxWithAB(board, depth, player, player)
 
-def random_ai_turn(board):
-    print("Tour de l'IA naïve : \n")
-
-    # Choix aleatoire parmis les remain
-    remain = empty_cells(board)
-    x, y = random.choice(remain)
-
-    board[x][y] = COMP
-    print(render(board))  # Show result board
+    board[x][y] = player
 
 def render(board):
     """Render the board board to stdout"""
@@ -259,32 +223,62 @@ def make_board(nb: int = 3):
 
 def main():
     clean()
-    nb_cases_ok = False
-    while not nb_cases_ok:
-        try:
-            nb_cases = int(input("Nombre de cases :"))
-            nb_cases_ok = True
-        except ValueError:
-            print("Nombre de cases incorrect")
+    nb_simulations_ok = algo_player1_ok = algo_player2_ok = False
 
-    print("Initialisation du board !")
-    board = make_board(nb_cases)
-    print(render(board), end="\n")
-    # Dans le code précédent, on verfiait que l'humain gagnait après avoir fait joué l'IA ce qui est idiot, il faut verfier que l'humain gagne apres avoir joué.
-    # Le developpeur devait pensé que son IA était imbattable et n'a pas vérifié ce qu'il se passait si l'humain gagnait.
-    while not wins(board, COMP) and len(empty_cells(board)) > 0:
-        human_turn(board)
-        if len(empty_cells(board)) == 0 or wins(board, HUMAN):
-            break
-        start_time = time.time()
-        ai_turn(board)
-        print("--- %s seconds ---" % (time.time() - start_time))
-    if wins(board, COMP):
-        print("L'IA a gagné !")
-    elif wins(board, HUMAN):
-        print("Vous avez gagné !")
-    else:
-        print("Egalité !")
+    while not algo_player1_ok:
+            algo_player1 = str(input("Joueur 1 ("+'|'.join(PLAYERS)+") :"))
+            if algo_player1 in PLAYERS:
+                algo_player1_ok = True
+            else:
+                print("Joueur 1 incorrect : choisir parmi "+'|'.join(PLAYERS))
+
+    while not algo_player2_ok:
+            algo_player2 = str(input("Joueur 2 ("+'|'.join(PLAYERS)+") :"))
+            if algo_player2 in PLAYERS:
+                algo_player2_ok = True
+            else:
+                print("Joueur 2 incorrect : choisir parmi "+'|'.join(PLAYERS))
+
+    while not nb_simulations_ok:
+        try:
+            nb_simulations = int(input("Nombre de simulations :"))
+            nb_simulations_ok = True
+        except ValueError:
+            print("Nombre de simulations incorrect")
+
+    clean()
+    print(f"Début de {algo_player1} VS {algo_player2} ({nb_simulations} parties) !\n")
+
+    win_player1 = win_player2 = draw = 0
+    start_time = time.time()
+    for i in range(nb_simulations):
+        if i in list(range(0,nb_simulations,int(nb_simulations/10))):
+            print(f"{i}/{nb_simulations}... ({time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - start_time))})")
+
+        board = make_board()
+        while not wins(board, PLAYER2) and len(empty_cells(board)) > 0:
+
+            ai_turn(board, algo_player1, PLAYER1)
+            if len(empty_cells(board)) == 0 or wins(board, PLAYER1):
+                break
+
+            ai_turn(board, algo_player2, PLAYER2)
+        if wins(board, PLAYER1):
+            win_player1 += 1
+        elif wins(board, PLAYER2):
+            win_player2 += 1
+        else:
+            draw +=1
+
+    ratio_win_player1 = round((win_player1/nb_simulations)*100, 2)
+    ratio_win_player2 = round((win_player2 / nb_simulations) * 100, 2)
+    ratio_draw = round((draw / nb_simulations) * 100, 2)
+
+    print(f"\nNombre de victoire {algo_player1} : {win_player1}/{nb_simulations} ({ratio_win_player1}%)")
+    print(f"Nombre d'égalité  : {draw}/{nb_simulations} ({ratio_draw}%)")
+    print(f"Nombre de victoire {algo_player2} : {win_player2}/{nb_simulations} ({ratio_win_player2}%)")
+
+    print(f"\n--- Temps total : {time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - start_time))} ---")
 
 if __name__ == '__main__':
     main()
