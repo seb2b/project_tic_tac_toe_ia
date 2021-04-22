@@ -5,9 +5,10 @@
 - ALLIOT Sébastien
 - BOUCOUM Idy
 
-### Description
+### Description du repository
 
 - `main.py` : Script pour jouer au Tic Tac Toe face à une IA (Näive, Minimax ou Minimax Alpha Beta)
+- `dist/main/main` : Exécutable du script python `main.py` généré à l'aide du package [PyInstaller](http://www.pyinstaller.org/)
 - `simulation.py` : Script pour lancer des simulations de `n` parties entre deux IA (board 3x3)
 
 ### Résultats des simulations

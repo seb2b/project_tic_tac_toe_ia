@@ -291,5 +291,9 @@ def main():
     else:
         print("Egalité !")
 
+    new_game = str(input("Nouvelle partie ? (y/n)"))
+    if new_game == "y":
+        main()
+
 if __name__ == '__main__':
     main()
