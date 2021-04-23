@@ -10,6 +10,7 @@ PLAYER2 = -1
 VOID = 0
 LEGEND = dict(zip((VOID, PLAYER1, PLAYER2), (" ", "O", "X")))
 
+
 def evaluate(board):
     """
     Perform heuristic evaluation from board.
@@ -22,6 +23,7 @@ def evaluate(board):
         return PLAYER1
     return VOID
 
+
 def empty_cells(board):
     """Extract the remainder of board"""
     cells = []  # it contains all empty cells
@@ -31,6 +33,7 @@ def empty_cells(board):
             if board[i][j] == VOID:
                 cells.append((i, j))
     return cells
+
 
 # Row calc example to split wins code
 def win_row(board, player, nb_win_case):
@@ -46,6 +49,7 @@ def win_row(board, player, nb_win_case):
                 isRow = 0
     return False
 
+
 # Col calc example to split wins code
 def win_col(board, player, nb_win_case):
     isCol = [0 for _ in range(0, len(board))]
@@ -60,6 +64,7 @@ def win_col(board, player, nb_win_case):
                 isCol[y] = 0
     return False
 
+
 # Diag calc example to split wins code
 def win_diag(board, player, nb_win_case):
     for x, row in enumerate(board):
@@ -71,12 +76,13 @@ def win_diag(board, player, nb_win_case):
                 isDiagL = 0
                 isDiagR = 0
                 for i in range(0, nb_win_case):
-                    if y + i < len(board) and board[x+i][y+i] == player:
+                    if y + i < len(board) and board[x + i][y + i] == player:
                         isDiagL += 1
-                    if y >= i and board[x+i][y-i] == player:
+                    if y >= i and board[x + i][y - i] == player:
                         isDiagR += 1
                 if isDiagL == nb_win_case or isDiagR == nb_win_case:
                     return True
+
 
 def wins(board, player, nb_win_case: int = 4):
     if nb_win_case > len(board):
@@ -106,9 +112,9 @@ def wins(board, player, nb_win_case: int = 4):
                     isDiagL = 0
                     isDiagR = 0
                     for i in range(0, nb_win_case):
-                        if y + i < len(board) and board[x+i][y+i] == player:
+                        if y + i < len(board) and board[x + i][y + i] == player:
                             isDiagL += 1
-                        if y >= i and board[x+i][y-i] == player:
+                        if y >= i and board[x + i][y - i] == player:
                             isDiagR += 1
                     if isDiagL == nb_win_case or isDiagR == nb_win_case:
                         return True
@@ -117,9 +123,11 @@ def wins(board, player, nb_win_case: int = 4):
                 isCol[y] = 0
     return False
 
+
 def game_over(board):
     """Check game over condition"""
     return wins(board, PLAYER1) or wins(board, PLAYER2)
+
 
 def clean():
     """Clear system terminal"""
@@ -128,6 +136,7 @@ def clean():
         os.system('cls')
     else:
         os.system('clear')
+
 
 def minimax(board, depth, player, true_player):
     # inf/-inf are the initial score for the players
@@ -140,7 +149,7 @@ def minimax(board, depth, player, true_player):
         x, y = cell[0], cell[1]
         board[x][y] = player
         if evaluate(board) == true_player:
-            best = [ x, y, true_player]
+            best = [x, y, true_player]
             board[x][y] = 0
             break
         score = minimax(board, depth - 1, -player, true_player)
@@ -153,7 +162,8 @@ def minimax(board, depth, player, true_player):
             best = score
     return best
 
-def minimaxWithAB(board, depth, player, true_player, alpha = -inf, beta = inf):
+
+def minimaxWithAB(board, depth, player, true_player, alpha=-inf, beta=inf):
     # inf/-inf are the initial score for the players
     best = [None, None, inf if player == true_player else -inf]
     if depth == 0 or game_over(board):
@@ -164,7 +174,7 @@ def minimaxWithAB(board, depth, player, true_player, alpha = -inf, beta = inf):
         x, y = cell[0], cell[1]
         board[x][y] = player
         if evaluate(board) == true_player:
-            best = [ x, y, true_player]
+            best = [x, y, true_player]
             board[x][y] = VOID
             break
         score = minimaxWithAB(board, depth - 1, -player, true_player, alpha, beta)
@@ -186,6 +196,7 @@ def minimaxWithAB(board, depth, player, true_player, alpha = -inf, beta = inf):
                 alpha = best[2]
     return best
 
+
 # board : [
 #     [0,0,0], 0 * 3 + 1 = 1
 #     [0,0,0], 1 * 3 + 1 = 4
@@ -197,6 +208,7 @@ def nb_to_coord(move: int, board_length: int):
             if move == ((i * board_length) + j + 1):
                 return i, j
     return None
+
 
 def ai_turn(board, algo, player):
     depth = len(empty_cells(board))  # The remaining of empty cells
@@ -212,17 +224,17 @@ def ai_turn(board, algo, player):
 
     board[x][y] = player
 
+
 def render(board):
     """Render the board board to stdout"""
     pretty_board = [[LEGEND[col] for col in row] for row in board]
     return ("{}\n" * len(pretty_board)).format(*pretty_board)
 
+
 def make_board(nb: int = 3):
     return [[0 for j in range(0, nb)] for i in range(0, nb)]
     # return [[0]*nb]*nb // Ne marche, chaque ligne obtient la même id()
 
-def test():
-  print(f"PLAYER1 : {PLAYER1}")
 
 def main():
     clean()
@@ -230,28 +242,37 @@ def main():
     global PLAYER1, PLAYER2
 
     while not algo_player1_ok:
-            algo_player1 = str(input("Joueur 1 ("+'|'.join(PLAYERS)+") :"))
-            if algo_player1 in PLAYERS:
-                algo_player1_ok = True
-            else:
-                print("Joueur 1 incorrect : choisir parmi "+'|'.join(PLAYERS))
+        algo_player1 = str(input("Joueur 1 (" + '|'.join(PLAYERS) + ") : "))
+        if algo_player1 in PLAYERS:
+            algo_player1_ok = True
+        else:
+            print("Joueur 1 incorrect : choisir parmi " + '|'.join(PLAYERS))
 
     while not algo_player2_ok:
-            algo_player2 = str(input("Joueur 2 ("+'|'.join(PLAYERS)+") :"))
-            if algo_player2 in PLAYERS:
-                algo_player2_ok = True
-                if algo_player2 == 'IA_random':
-                  PLAYER1 = -1
-                  PLAYER2 = 1
-            else:
-                print("Joueur 2 incorrect : choisir parmi "+'|'.join(PLAYERS))
+        algo_player2 = str(input("Joueur 2 (" + '|'.join(PLAYERS) + ") : "))
+        if algo_player2 in PLAYERS:
+            algo_player2_ok = True
+            if algo_player2 == 'IA_random':
+                PLAYER1 = -1
+                PLAYER2 = 1
+        else:
+            print("Joueur 2 incorrect : choisir parmi " + '|'.join(PLAYERS))
 
     while not nb_simulations_ok:
         try:
-            nb_simulations = int(input("Nombre de simulations :"))
+            nb_simulations = int(input("Nombre de simulations : "))
             nb_simulations_ok = True
         except ValueError:
             print("Nombre de simulations incorrect")
+
+    while not nb_simulations_ok:
+        try:
+            nb_simulations = int(input("Nombre de simulations : "))
+            nb_simulations_ok = True
+        except ValueError:
+            print("Nombre de simulations incorrect")
+
+    print_log = int(input("Logging du board (0/1) : "))
 
     clean()
     print(f"Début de {algo_player1} VS {algo_player2} ({nb_simulations} parties) !\n")
@@ -259,26 +280,32 @@ def main():
     win_player1 = win_player2 = draw = 0
     start_time = time.time()
     for i in range(nb_simulations):
-        nb_p = 1 if int(nb_simulations/10)==0 else int(nb_simulations/10)
-        if i in list(range(0,nb_simulations,nb_p)):
+        nb_p = 1 if int(nb_simulations / 10) == 0 else int(nb_simulations / 10)
+        if i in list(range(0, nb_simulations, nb_p)):
             print(f"{i}/{nb_simulations}... ({time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - start_time))})")
 
         board = make_board()
         while not wins(board, PLAYER2) and len(empty_cells(board)) > 0:
 
+            if print_log == 1: print(f"Tour de {algo_player1}...")
             ai_turn(board, algo_player1, PLAYER1)
+            if print_log == 1: print(render(board), end="\n")
+
             if len(empty_cells(board)) == 0 or wins(board, PLAYER1):
                 break
 
+            if print_log == 1: print(f"Tour de {algo_player2}...")
             ai_turn(board, algo_player2, PLAYER2)
+            if print_log == 1: print(render(board), end="\n")
+
         if wins(board, PLAYER1):
             win_player1 += 1
         elif wins(board, PLAYER2):
             win_player2 += 1
         else:
-            draw +=1
+            draw += 1
 
-    ratio_win_player1 = round((win_player1/nb_simulations)*100, 2)
+    ratio_win_player1 = round((win_player1 / nb_simulations) * 100, 2)
     ratio_win_player2 = round((win_player2 / nb_simulations) * 100, 2)
     ratio_draw = round((draw / nb_simulations) * 100, 2)
 
@@ -287,6 +314,7 @@ def main():
     print(f"Nombre de victoire {algo_player2} : {win_player2}/{nb_simulations} ({ratio_win_player2}%)")
 
     print(f"\n--- Temps total : {time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - start_time))} ---")
+
 
 if __name__ == '__main__':
     main()
